@@ -3,13 +3,20 @@ import java.util.*;
 
 public class Main {
 
-    private static String filePath = "src/Sample1.txt";
+    private static String filePath;
     private static final List<String> words = new ArrayList<>();
     private static final Map<String, List<Integer>> wordIndex = new HashMap<>();
 
     private static final Scanner scanner = new Scanner(System.in);
 
+    private static String normalizeWord(String word){
+        return word.toLowerCase().replaceAll("[^a-zA-Z]", "");
+    }
+
     private static void storeWords() {
+        words.clear();
+        wordIndex.clear(); // Clear previous file's data
+
         int lineNumber = 0;
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -18,8 +25,8 @@ public class Main {
                 lineNumber++;
                 String[] splitWords = line.split("\\s+");
                 for (String splitWord : splitWords) {
-                    String word = splitWord.toLowerCase().replaceAll("[^a-zA-Z]", "");
-                    if (!word.isEmpty()) {  // Check if the word is not empty
+                    String word = normalizeWord(splitWord);
+                    if (!word.isEmpty()) {
                         wordIndex.putIfAbsent(word, new ArrayList<>());
                         wordIndex.get(word).add(lineNumber);
                         words.add(word);
@@ -28,8 +35,35 @@ public class Main {
             }
         } catch (IOException e) {
             System.err.println("Error reading the file: " + e.getMessage());
-            e.printStackTrace();
         }
+    }
+
+    private static void selectFile() {
+        System.out.println("Choose a file to load:");
+        System.out.println("1. Sample1.txt");
+        System.out.println("2. Sample2.txt");
+        System.out.println("3. Sample3.txt");
+        System.out.println("4. Sample4.txt");
+
+        int fileChoice = Integer.parseInt(scanner.nextLine());
+        switch (fileChoice) {
+            case 1:
+                filePath = "src/Sample1.txt";
+                break;
+            case 2:
+                filePath = "src/Sample2.txt";
+                break;
+            case 3:
+                filePath = "src/Sample3.txt";
+                break;
+            case 4:
+                filePath = "src/Sample4.txt";
+            default:
+                System.out.println("Invalid choice. Defaulting to Sample1.txt.");
+                filePath = "src/Sample1.txt";
+        }
+
+        storeWords(); // Load the file data
     }
 
     private static void printFile() {
@@ -38,8 +72,6 @@ public class Main {
             while ((line = br.readLine()) != null) {
                 System.out.println(line);
             }
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Error reading the file: " + e.getMessage());
         }
@@ -54,12 +86,12 @@ public class Main {
         }
     }
 
-    private static void searchWordFrequency(){
+    private static void searchWordFrequency() {
         System.out.println("Enter the word you are searching for: ");
         String targetWord = scanner.nextLine();
-        targetWord = targetWord.toLowerCase().replaceAll("[^a-zA-Z]", ""); //Re-Normalize word
+        targetWord = normalizeWord(targetWord);
 
-        if(wordIndex.containsKey(targetWord)){
+        if (wordIndex.containsKey(targetWord)) {
             List<Integer> occurrences = wordIndex.get(targetWord);
             System.out.printf("The word '%s' appears %d times on lines: %s%n", targetWord, occurrences.size(), occurrences);
         } else {
@@ -67,21 +99,72 @@ public class Main {
         }
     }
 
+    private static void printTotalWordCount() {
+        System.out.printf("Total number of words: %d%n", words.size());
+        System.out.printf("Total number of unique words: %d%n", wordIndex.size());
+    }
+
+    private static void searchByLine() {
+        System.out.println("Enter the line you are looking for: ");
+        int targetLine = Integer.parseInt(scanner.nextLine());
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            int currentLine = 0;
+            while ((line = br.readLine()) != null) {
+                currentLine++;
+                if (currentLine == targetLine) {
+                    System.out.printf("Line %d: %s%n", targetLine, line);
+                    return;
+                }
+            }
+            System.out.println("Line not found.");
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        }
+    }
+
+    private static void searchForPhrase(){
+        System.out.println("Enter the phrase you are looking for: ");
+        String targetPhrase = scanner.nextLine();
+        targetPhrase = targetPhrase.toLowerCase();
+        try(BufferedReader br = new BufferedReader(new FileReader(filePath))){
+            String line;
+            int lineNumber = 0;
+            boolean found = false;
+
+            while ((line = br.readLine()) != null){
+                lineNumber++;
+                if (line.toLowerCase().contains(targetPhrase)) {
+                    System.out.printf("Line %d: %s%n", lineNumber, line);
+                    found = true;
+                }
+            }
+            if (!found) {
+                System.out.printf("The phrase '%s' was not found in the text.%n", targetPhrase);
+            }
+        } catch (IOException e){
+            System.err.println("Error reading the file: " + e.getMessage());
+        }
+    }
+
     private static void printInstructions() {
-        System.out.printf("%n0.Exit Program%n1.Print File%n2.List words in order of usage%n3.Search for a word%n");
+        System.out.printf("You are reading %s",filePath);
+        System.out.printf("%n-1. Return to file selection%n0. Exit Program%n1. Print File%n2. List words in order of usage%n3. Search for a word%n4. Print total word count%n" +
+                "5. Search by line%n6. Search for phrase%n");
     }
 
     public static void main(String[] args) {
 
-        storeWords();
-
-        System.out.printf("%nYou're currently reading %s", filePath);
+        selectFile(); // Select a file first
 
         boolean loop = true;
         while (loop) {
             printInstructions();
             int input = Integer.parseInt(scanner.nextLine());
             switch (input) {
+                case -1:
+                    selectFile(); // Return to file selection
+                    break;
                 case 0:
                     loop = false;
                     break;
@@ -94,10 +177,18 @@ public class Main {
                 case 3:
                     searchWordFrequency();
                     break;
-                default: {
+                case 4:
+                    printTotalWordCount();
+                    break;
+                case 5:
+                    searchByLine();
+                    break;
+                case 6:
+                    searchForPhrase();
+                    break;
+                default:
                     System.out.println("Error, Invalid input.");
                     break;
-                }
             }
         }
     }
