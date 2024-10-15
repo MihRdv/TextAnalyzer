@@ -7,6 +7,8 @@ public class Main {
     private static final List<String> words = new ArrayList<>();
     private static final Map<String, List<Integer>> wordIndex = new HashMap<>();
 
+    private static final Scanner scanner = new Scanner(System.in);
+
     private static void storeWords() {
         int lineNumber = 0;
 
@@ -52,12 +54,25 @@ public class Main {
         }
     }
 
+    private static void searchWordFrequency(){
+        System.out.println("Enter the word you are searching for: ");
+        String targetWord = scanner.nextLine();
+        targetWord = targetWord.toLowerCase().replaceAll("[^a-zA-Z]", ""); //Re-Normalize word
+
+        if(wordIndex.containsKey(targetWord)){
+            List<Integer> occurrences = wordIndex.get(targetWord);
+            System.out.printf("The word '%s' appears %d times on lines: %s%n", targetWord, occurrences.size(), occurrences);
+        } else {
+            System.out.printf("The word '%s' is not found in the text.%n", targetWord);
+        }
+    }
+
     private static void printInstructions() {
-        System.out.printf("%n0.Exit Program%n1.Print File%n2.List words in order of usage%n");
+        System.out.printf("%n0.Exit Program%n1.Print File%n2.List words in order of usage%n3.Search for a word%n");
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+
         storeWords();
 
         System.out.printf("%nYou're currently reading %s", filePath);
@@ -75,6 +90,9 @@ public class Main {
                     break;
                 case 2:
                     printMostUsed();
+                    break;
+                case 3:
+                    searchWordFrequency();
                     break;
                 default: {
                     System.out.println("Error, Invalid input.");
