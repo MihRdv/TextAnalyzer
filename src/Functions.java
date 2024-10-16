@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class Functions {
@@ -166,5 +164,34 @@ public class Functions {
         System.out.printf("Total lines: %d%n", lineCount);
         System.out.printf("Total characters: %d%n", characterCount);
         System.out.printf("Average words per line: %.2f%n", (double) words.size() / lineCount);
+    }
+
+    public static void exportFileAnalysis(){
+        System.out.println("Enter the name of the file you want to analyze without the extensions: ");
+        String fileName =  scanner.nextLine();
+        String exportPath = "src/exports/" + fileName + ".txt";
+
+        File exportDir = new File("src/exports");
+        if(!exportDir.exists()){
+            exportDir.mkdirs();
+
+            try(FileWriter writer = new FileWriter(exportPath)){
+                writer.write("File: " + filePath + "\n");
+                writer.write("Total words: " + words.size() + "\n");
+                writer.write("Unique words: " + wordIndex.size() + "\n");
+                writer.write("\nWord Frequency:\n");
+
+                List<Map.Entry<String, List<Integer>>> sortedEntries = new ArrayList<>(wordIndex.entrySet());
+                sortedEntries.sort((entry1, entry2) -> Integer.compare(entry2.getValue().size(), entry1.getValue().size()));
+
+                for (Map.Entry<String, List<Integer>> entry : sortedEntries) {
+                    writer.write(String.format("%s: %d times, on lines %s%n", entry.getKey(), entry.getValue().size(), entry.getValue()));
+                }
+
+                System.out.println("Analysis exported to: " + exportPath);
+            } catch (IOException e){
+                System.err.println("Error writing to file: " + e.getMessage());
+            }
+        }
     }
 }

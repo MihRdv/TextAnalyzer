@@ -2,9 +2,9 @@
 public class Main extends Functions {
 
     private static void printInstructions() {
-        System.out.printf("You are reading %s",filePath);
-        System.out.printf("%n-1. Return to file selection%n0. Exit Program%n1. Print File%n2. List words in order of usage%n3. Search for a word%n4. Print total word count%n" +
-                "5. Search by line%n6. Search for phrase%n");
+        System.out.printf("You are reading %s%n", filePath);
+        System.out.printf("%n0. Exit Program%n1. Print File%n2. List words in order of usage%n3. Search for a word%n4. Print total word count%n" +
+                "5. Search by line%n6. Search for phrase%n7. File statistics%n8. Export analysis to file%n");
     }
 
     public static void main(String[] args) {
@@ -42,6 +42,9 @@ public class Main extends Functions {
                     break;
                 case 7:
                     printFileStatistics();
+                    break;
+                case 8:
+                    exportFileAnalysis();
                     break;
                 default:
                     System.out.println("Error, Invalid input.");
