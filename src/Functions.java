@@ -166,32 +166,34 @@ public class Functions {
         System.out.printf("Average words per line: %.2f%n", (double) words.size() / lineCount);
     }
 
-    public static void exportFileAnalysis(){
-        System.out.println("Enter the name of the file you want to analyze without the extensions: ");
-        String fileName =  scanner.nextLine();
-        String exportPath = "src/exports/" + fileName + ".txt";
-
+    public static void exportFileAnalysis() {
+        // Create the exports directory if it doesn't exist
         File exportDir = new File("src/exports");
-        if(!exportDir.exists()){
-            exportDir.mkdirs();
+        exportDir.mkdirs();
 
-            try(FileWriter writer = new FileWriter(exportPath)){
-                writer.write("File: " + filePath + "\n");
-                writer.write("Total words: " + words.size() + "\n");
-                writer.write("Unique words: " + wordIndex.size() + "\n");
-                writer.write("\nWord Frequency:\n");
+        // Define a new file path in the exports directory for the analysis output
+        String exportPath = "src/exports/" + new File(filePath).getName().replace(".txt", "_analysis.txt");
 
-                List<Map.Entry<String, List<Integer>>> sortedEntries = new ArrayList<>(wordIndex.entrySet());
-                sortedEntries.sort((entry1, entry2) -> Integer.compare(entry2.getValue().size(), entry1.getValue().size()));
+        try (FileWriter writer = new FileWriter(exportPath)) {
+            writer.write("File: " + filePath + "\n");
+            writer.write("Total words: " + words.size() + "\n");
+            writer.write("Unique words: " + wordIndex.size() + "\n");
+            writer.write("\nWord Frequency:\n");
 
-                for (Map.Entry<String, List<Integer>> entry : sortedEntries) {
-                    writer.write(String.format("%s: %d times, on lines %s%n", entry.getKey(), entry.getValue().size(), entry.getValue()));
-                }
+            // Sort entries by frequency
+            List<Map.Entry<String, List<Integer>>> sortedEntries = new ArrayList<>(wordIndex.entrySet());
+            sortedEntries.sort((entry1, entry2) -> Integer.compare(entry2.getValue().size(), entry1.getValue().size()));
 
-                System.out.println("Analysis exported to: " + exportPath);
-            } catch (IOException e){
-                System.err.println("Error writing to file: " + e.getMessage());
+            // Write each word's frequency and occurrence lines to the file
+            for (Map.Entry<String, List<Integer>> entry : sortedEntries) {
+                writer.write(String.format("%s: %d times, on lines %s%n", entry.getKey(), entry.getValue().size(), entry.getValue()));
             }
+
+            System.out.println("Analysis exported to: " + exportPath);
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
         }
     }
+
 }
+
